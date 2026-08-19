@@ -25,24 +25,26 @@
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
-  body{
-    background:var(--paper);
-    color:var(--ink);
-    font-family:'Inter',sans-serif;
-    -webkit-font-smoothing:antialiased;
-    height:100vh;
-    overflow:hidden;
-  }
-  #app{
-    max-width:480px;
-    margin:0 auto;
-    height:100vh;
-    background:var(--paper);
-    display:flex;
-    flex-direction:column;
-    position:relative;
-    box-shadow:0 0 40px rgba(22,33,58,0.08);
-  }
+ body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:'Inter',sans-serif;
+  -webkit-font-smoothing:antialiased;
+  min-height:100vh;
+  margin:0;
+}
+
+#app{
+  width:100%;
+  max-width:480px;
+  min-height:100vh;
+  margin:0 auto;
+  background:var(--paper);
+  display:flex;
+  flex-direction:column;
+  position:relative;
+  box-shadow:0 0 40px rgba(22,33,58,0.08);
+}
   .display{font-family:'Fraunces',serif;}
   .mono{font-family:'JetBrains Mono',monospace;}
   ::selection{background:var(--teal); color:#fff;}
@@ -272,6 +274,131 @@
   .toast.show{opacity:1; bottom:106px;}
 
   .link-btn{background:none;border:none;color:var(--teal-deep);font-weight:700;font-size:13px;padding:0;}
+/* ============================================================
+   RESPONSIVE DESIGN
+   ============================================================ */
+
+/* Small phones */
+@media (max-width: 380px) {
+
+  .topbar{
+    padding:12px 12px 8px;
+  }
+
+  .searchbar{
+    margin-left:12px;
+    margin-right:12px;
+  }
+
+  .scroll{
+    padding-left:12px;
+    padding-right:12px;
+    padding-bottom:90px;
+  }
+
+  .hero{
+    padding:16px;
+    border-radius:18px;
+  }
+
+  .hero-title{
+    font-size:20px;
+  }
+
+  .hero-row{
+    gap:12px;
+  }
+
+  .ring{
+    width:58px;
+    height:58px;
+  }
+
+  .ring-inner{
+    width:48px;
+    height:48px;
+  }
+
+  .onboard{
+    padding:28px 20px;
+  }
+
+  .onboard h1{
+    font-size:27px;
+  }
+
+  .sheet{
+    padding-left:16px;
+    padding-right:16px;
+  }
+
+  .field-row{
+    flex-direction:column;
+    gap:0;
+  }
+}
+
+
+/* Normal phones and tablets */
+@media (min-width: 481px) {
+
+  body{
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+  }
+
+  #app{
+    min-height:100vh;
+    border-left:1px solid var(--line);
+    border-right:1px solid var(--line);
+  }
+}
+
+
+/* Larger tablets / laptops */
+@media (min-width: 768px) {
+
+  #app{
+    max-width:520px;
+    margin-top:20px;
+    min-height:calc(100vh - 40px);
+    max-height:calc(100vh - 40px);
+    border-radius:24px;
+    overflow:hidden;
+  }
+
+  .sheet{
+    border-radius:24px;
+    max-width:520px;
+    left:50%;
+    right:auto;
+    width:100%;
+    transform:translate(-50%, 100%);
+  }
+
+  .sheet.show{
+    transform:translate(-50%, 0);
+  }
+}
+
+
+/* Desktop */
+@media (min-width: 1200px) {
+
+  #app{
+    max-width:560px;
+  }
+
+  .hero-title{
+    font-size:25px;
+  }
+
+  .scroll{
+    padding-left:20px;
+    padding-right:20px;
+  }
+}
 </style>
 </head>
 <body>
