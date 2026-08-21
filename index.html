@@ -406,6 +406,13 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+const SUPABASE_URL = 'https://okwxykgtutlhqayykkbg.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_OUUGPwphJNehTJudz5oEew_fz7hAlGh';
+
+const supabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_PUBLISHABLE_KEY
+);
 /* ============================================================
    STORAGE HELPERS
    Standalone version: uses browser localStorage.
