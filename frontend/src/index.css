@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    @apply bg-base text-ink font-body;
+  }
+  body {
+    @apply antialiased;
+  }
+  ::selection {
+    @apply bg-accent/30;
+  }
+  :focus-visible {
+    outline: 2px solid theme("colors.accent.DEFAULT");
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-base-panel border border-base-border rounded-card shadow-subtle;
+  }
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 bg-accent hover:bg-accent-glow text-white font-medium text-sm px-4 py-2.5 rounded-lg transition-colors duration-150 disabled:opacity-50 disabled:pointer-events-none;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 bg-base-raised hover:bg-base-border border border-base-border text-ink font-medium text-sm px-4 py-2.5 rounded-lg transition-colors duration-150 disabled:opacity-50 disabled:pointer-events-none;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 text-ink-muted hover:text-ink hover:bg-base-raised font-medium text-sm px-3 py-2 rounded-lg transition-colors duration-150;
+  }
+  .input {
+    @apply w-full bg-base-raised border border-base-border rounded-lg px-3.5 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:border-accent focus:ring-1 focus:ring-accent outline-none transition-colors duration-150;
+  }
+  .label {
+    @apply block text-sm font-medium text-ink-muted mb-1.5;
+  }
+}
