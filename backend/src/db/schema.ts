@@ -123,10 +123,31 @@ export const announcements = pgTable("announcements", {
   classIdx: index("announcements_class_idx").on(table.classId),
 }));
 
+// ---------- PUSH SUBSCRIPTIONS ----------
+// One row per subscribed device/browser (a user can have several — phone,
+// laptop, etc.). Endpoint is unique per device+browser install.
+export const pushSubscriptions = pgTable("push_subscriptions", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  endpoint: text("endpoint").notNull(),
+  p256dh: varchar("p256dh", { length: 255 }).notNull(),
+  auth: varchar("auth", { length: 255 }).notNull(),
+  userAgent: varchar("user_agent", { length: 255 }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => ({
+  endpointIdx: uniqueIndex("push_subscriptions_endpoint_idx").on(table.endpoint),
+  userIdx: index("push_subscriptions_user_idx").on(table.userId),
+}));
+
 // ---------- RELATIONS ----------
 export const usersRelations = relations(users, ({ many }) => ({
   memberships: many(classMembers),
   createdClasses: many(classes),
+  pushSubscriptions: many(pushSubscriptions),
+}));
+
+export const pushSubscriptionsRelations = relations(pushSubscriptions, ({ one }) => ({
+  user: one(users, { fields: [pushSubscriptions.userId], references: [users.id] }),
 }));
 
 export const classesRelations = relations(classes, ({ many, one }) => ({

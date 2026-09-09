@@ -10,7 +10,9 @@ import subjectRoutes from "./routes/subjects.js";
 import timetableRoutes from "./routes/timetable.js";
 import homeworkRoutes from "./routes/homework.js";
 import announcementRoutes from "./routes/announcements.js";
+import pushRoutes from "./routes/push.js";
 import { errorHandler } from "./middleware/errorHandler.js";
+import { startClassReminderScheduler } from "./jobs/classReminders.js";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -31,10 +33,12 @@ app.use("/api/classes", subjectRoutes);
 app.use("/api/classes", timetableRoutes);
 app.use("/api/classes", homeworkRoutes);
 app.use("/api/classes", announcementRoutes);
+app.use("/api/push", pushRoutes);
 
 app.use((_req, res) => res.status(404).json({ error: "Route not found." }));
 app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`ClassMate API running on http://localhost:${PORT}`);
+  startClassReminderScheduler();
 });

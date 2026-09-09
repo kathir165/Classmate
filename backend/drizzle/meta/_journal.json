@@ -8,6 +8,13 @@
       "when": 1788797061168,
       "tag": "0000_serious_nomad",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1788941299172,
+      "tag": "0001_loving_lionheart",
+      "breakpoints": true
     }
   ]
 }
