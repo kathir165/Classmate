@@ -12,7 +12,6 @@ import {
   ChevronDown,
   Menu,
   X,
-  MoreHorizontal,
 } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
@@ -199,14 +198,6 @@ export function AppShell() {
               {item.label}
             </NavLink>
           ))}
-          <button
-            onClick={() => setMobileMenuOpen(true)}
-            className="flex flex-col items-center justify-center gap-0.5 flex-1 h-full text-[11px] font-medium text-ink-faint hover:text-ink transition-colors"
-            aria-label="Open more options"
-          >
-            <MoreHorizontal size={20} strokeWidth={2} />
-            More
-          </button>
         </nav>
 
         {/* Mobile menu drawer */}
