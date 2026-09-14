@@ -1,30 +1,79 @@
-import { eq, and, inArray } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { db } from "../db/index.js";
-import { timetableEntries, subjects, classMembers, pushSubscriptions } from "../db/schema.js";
+import {
+  timetableEntries,
+  subjects,
+  classMembers,
+  pushSubscriptions,
+} from "../db/schema.js";
 import { sendPush, pushConfigured } from "../utils/push.js";
 
 const REMINDER_MINUTES_BEFORE = 5;
-const CHECK_INTERVAL_MS = 60_000; // once a minute is enough precision for a 5-minute-out reminder
+const CHECK_INTERVAL_MS = 30_000;
 
-// In-memory guard against sending the same reminder twice from this process
-// within the same day. Resets naturally when the key's date rolls over.
-// Note: in a horizontally-scaled (multi-instance) deployment, replace this
-// with a DB or Redis-backed lock so two instances don't double-send.
+// Class timetable timezone.
+// Render servers use UTC, so we must explicitly calculate
+// the current time in India.
+const CLASS_TIME_ZONE = "Asia/Kolkata";
+
+// In-memory guard to prevent duplicate notifications
+// while this server instance is running.
 const sentToday = new Set<string>();
 
-function todayDateKey(): string {
-  return new Date().toISOString().slice(0, 10);
+type LocalNow = {
+  dayOfWeek: number;
+  nowSeconds: number;
+  dateKey: string;
+};
+
+function getClassLocalNow(): LocalNow {
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: CLASS_TIME_ZONE,
+    weekday: "short",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(new Date());
+
+  const get = (type: string) =>
+    parts.find((part) => part.type === type)?.value ?? "";
+
+  const weekday = get("weekday");
+
+  const dayMap: Record<string, number> = {
+    Sun: 0,
+    Mon: 1,
+    Tue: 2,
+    Wed: 3,
+    Thu: 4,
+    Fri: 5,
+    Sat: 6,
+  };
+
+  const hour = Number(get("hour"));
+  const minute = Number(get("minute"));
+  const second = Number(get("second"));
+
+  const year = get("year");
+  const month = get("month");
+  const day = get("day");
+
+  return {
+    dayOfWeek: dayMap[weekday],
+    nowSeconds: hour * 3600 + minute * 60 + second,
+    dateKey: `${year}-${month}-${day}`,
+  };
 }
 
 async function checkAndSendReminders() {
   if (!pushConfigured) return;
 
-  const now = new Date();
-  const todayIdx = now.getDay();
-  const nowMinutes = now.getHours() * 60 + now.getMinutes();
-  const dateKey = todayDateKey();
+  const { dayOfWeek, nowSeconds, dateKey } = getClassLocalNow();
 
-  // Every entry scheduled for today.
   const todaysEntries = await db
     .select({
       id: timetableEntries.id,
@@ -36,67 +85,140 @@ async function checkAndSendReminders() {
       teacher: subjects.teacher,
     })
     .from(timetableEntries)
-    .innerJoin(subjects, eq(timetableEntries.subjectId, subjects.id))
-    .where(eq(timetableEntries.dayOfWeek, todayIdx));
+    .innerJoin(
+      subjects,
+      eq(timetableEntries.subjectId, subjects.id)
+    )
+    .where(eq(timetableEntries.dayOfWeek, dayOfWeek));
 
   for (const entry of todaysEntries) {
     const sentKey = `${entry.id}-${dateKey}`;
+
     if (sentToday.has(sentKey)) continue;
 
     const [h, m] = entry.startTime.split(":").map(Number);
-    const startMinutes = h * 60 + m;
-    const reminderMinutes = startMinutes - REMINDER_MINUTES_BEFORE;
 
-    // Fire once we're in the 5-minute window (and haven't already fired).
-    if (nowMinutes < reminderMinutes || nowMinutes >= startMinutes) continue;
+    const startSeconds = h * 3600 + m * 60;
+    const secondsUntilClass = startSeconds - nowSeconds;
 
-    sentToday.add(sentKey);
+    /*
+     * We check every 30 seconds.
+     *
+     * Accept the window from 4 to 5 minutes before class.
+     * This makes the scheduler much less likely to miss
+     * the exact 5-minute boundary.
+     */
+    const reminderWindowStart =
+      REMINDER_MINUTES_BEFORE * 60 - 60;
+
+    const reminderWindowEnd =
+      REMINDER_MINUTES_BEFORE * 60;
+
+    if (
+      secondsUntilClass <= 0 ||
+      secondsUntilClass < reminderWindowStart ||
+      secondsUntilClass > reminderWindowEnd
+    ) {
+      continue;
+    }
 
     const members = await db
-      .select({ userId: classMembers.userId })
+      .select({
+        userId: classMembers.userId,
+      })
       .from(classMembers)
       .where(eq(classMembers.classId, entry.classId));
+
     if (members.length === 0) continue;
+
+    const userIds = members.map((member) => member.userId);
 
     const subs = await db
       .select()
       .from(pushSubscriptions)
-      .where(inArray(pushSubscriptions.userId, members.map((m) => m.userId)));
+      .where(inArray(pushSubscriptions.userId, userIds));
+
     if (subs.length === 0) continue;
 
-    const minutesLeft = startMinutes - nowMinutes;
+    const minutesLeft = Math.max(
+      1,
+      Math.ceil(secondsUntilClass / 60)
+    );
+
     const payload = {
       title: `${entry.subjectName} starts in ${minutesLeft} min`,
-      body: [entry.teacher, entry.room ? `Room ${entry.room}` : null].filter(Boolean).join(" · ") || "Get ready!",
+      body:
+        [
+          entry.teacher,
+          entry.room ? `Room ${entry.room}` : null,
+        ]
+          .filter(Boolean)
+          .join(" · ") || "Get ready!",
       tag: `classmate-${entry.id}-${dateKey}`,
       url: "/timetable",
     };
 
     const expiredEndpoints: string[] = [];
+
     await Promise.all(
       subs.map(async (sub) => {
         const result = await sendPush(
-          { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
+          {
+            endpoint: sub.endpoint,
+            keys: {
+              p256dh: sub.p256dh,
+              auth: sub.auth,
+            },
+          },
           payload
         );
-        if (result.expired) expiredEndpoints.push(sub.endpoint);
+
+        if (result.expired) {
+          expiredEndpoints.push(sub.endpoint);
+        }
       })
     );
 
     if (expiredEndpoints.length > 0) {
-      await db.delete(pushSubscriptions).where(inArray(pushSubscriptions.endpoint, expiredEndpoints));
+      await db
+        .delete(pushSubscriptions)
+        .where(
+          inArray(
+            pushSubscriptions.endpoint,
+            expiredEndpoints
+          )
+        );
     }
+
+    // Only mark it as sent after we actually had subscriptions
+    // to process.
+    sentToday.add(sentKey);
+
+    console.log(
+      `[push] Reminder sent: ${entry.subjectName} in ${minutesLeft} min`
+    );
   }
 }
 
 export function startClassReminderScheduler() {
   if (!pushConfigured) {
-    console.warn("[push] Reminder scheduler not started — VAPID keys are not configured.");
+    console.warn(
+      "[push] Reminder scheduler not started — VAPID keys are not configured."
+    );
     return;
   }
-  console.log("[push] Class reminder scheduler started (checking every 60s).");
-  checkAndSendReminders().catch((err) => console.error("[push] reminder check failed:", err));
+
+  console.log(
+    `[push] Class reminder scheduler started — timezone: ${CLASS_TIME_ZONE}, checking every 30s.`
+  );
+
+  checkAndSendReminders().catch((err) =>
+    console.error("[push] reminder check failed:", err)
+  );
+
   setInterval(() => {
-    checkAndSendReminders().catch((err) => console.error("[push] reminder check failed:", err));
+    checkAndSendReminders().catch((err) =>
+      console.error("[push] reminder check failed:", err)
+    );
   }, CHECK_INTERVAL_MS);
 }
