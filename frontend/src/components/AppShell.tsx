@@ -10,6 +10,9 @@ import {
   Settings,
   LogOut,
   ChevronDown,
+  Menu,
+  X,
+  MoreHorizontal,
 } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
@@ -30,13 +33,25 @@ const MOBILE_NAV_ITEMS = [
   { to: "/timetable", label: "Timetable", icon: CalendarClock },
   { to: "/homework", label: "Homework", icon: ClipboardList },
   { to: "/subjects", label: "Subjects", icon: BookOpen },
+];
+
+const MOBILE_MENU_ITEMS = [
+  { to: "/announcements", label: "Announcements", icon: Megaphone },
+  { to: "/members", label: "Members", icon: Users },
   { to: "/profile", label: "Profile", icon: UserRound },
+  { to: "/settings", label: "Settings", icon: Settings },
 ];
 
 export function AppShell() {
   const { user, logout } = useAuth();
   const { classes, activeClass, setActiveClassId } = useClasses();
   const [switcherOpen, setSwitcherOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  function handleMobileLogout() {
+    setMobileMenuOpen(false);
+    logout();
+  }
 
   return (
     <div className="min-h-screen bg-base flex">
@@ -134,14 +149,24 @@ export function AppShell() {
       {/* Main content */}
       <div className="flex-1 min-w-0 flex flex-col">
         <header className="md:hidden h-14 flex items-center justify-between px-4 border-b border-base-border bg-base-panel/60 sticky top-0 z-30">
+          <button
+            onClick={() => setMobileMenuOpen(true)}
+            className="p-2 -ml-2 rounded-lg text-ink-muted hover:text-ink hover:bg-base-raised transition-colors"
+            aria-label="Open menu"
+            title="Menu"
+          >
+            <Menu size={22} />
+          </button>
+
           <span className="font-display font-bold text-base text-ink">
             Class<span className="text-accent">Mate</span>
           </span>
+
           {classes.length > 1 ? (
             <select
               value={activeClass?.id}
               onChange={(e) => setActiveClassId(e.target.value)}
-              className="bg-base-raised border border-base-border text-xs text-ink rounded-md px-2 py-1.5 max-w-[40%]"
+              className="bg-base-raised border border-base-border text-xs text-ink rounded-md px-2 py-1.5 max-w-[32%]"
             >
               {classes.map((c) => (
                 <option key={c.id} value={c.id}>
@@ -158,7 +183,7 @@ export function AppShell() {
           <Outlet />
         </main>
 
-        {/* Mobile bottom nav */}
+        {/* Mobile navigation */}
         <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-base-panel border-t border-base-border flex items-center justify-around z-30">
           {MOBILE_NAV_ITEMS.map((item) => (
             <NavLink
@@ -174,7 +199,101 @@ export function AppShell() {
               {item.label}
             </NavLink>
           ))}
+          <button
+            onClick={() => setMobileMenuOpen(true)}
+            className="flex flex-col items-center justify-center gap-0.5 flex-1 h-full text-[11px] font-medium text-ink-faint hover:text-ink transition-colors"
+            aria-label="Open more options"
+          >
+            <MoreHorizontal size={20} strokeWidth={2} />
+            More
+          </button>
         </nav>
+
+        {/* Mobile menu drawer */}
+        {mobileMenuOpen && (
+          <div className="md:hidden fixed inset-0 z-50">
+            <button
+              className="absolute inset-0 bg-black/50"
+              onClick={() => setMobileMenuOpen(false)}
+              aria-label="Close menu"
+            />
+
+            <aside className="absolute left-0 top-0 bottom-0 w-[min(84vw,320px)] bg-base-panel border-r border-base-border shadow-2xl flex flex-col">
+              <div className="h-16 flex items-center justify-between px-5 border-b border-base-border shrink-0">
+                <span className="font-display font-bold text-lg tracking-tight text-ink">
+                  Class<span className="text-accent">Mate</span>
+                </span>
+                <button
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="p-2 rounded-lg text-ink-muted hover:text-ink hover:bg-base-raised transition-colors"
+                  aria-label="Close menu"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="p-4 border-b border-base-border">
+                <div className="flex items-center gap-3 min-w-0">
+                  <Avatar name={user?.name || ""} color={user?.avatarColor} size={40} />
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-ink truncate">{user?.name}</p>
+                    <p className="text-xs text-ink-faint truncate">{activeClass?.name || "No class"}</p>
+                  </div>
+                </div>
+              </div>
+
+              <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+                {NAV_ITEMS.map((item) => (
+                  <NavLink
+                    key={item.to}
+                    to={item.to}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={({ isActive }) =>
+                      `flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium transition-colors ${
+                        isActive
+                          ? "bg-accent/10 text-accent"
+                          : "text-ink-muted hover:text-ink hover:bg-base-raised"
+                      }`
+                    }
+                  >
+                    <item.icon size={19} strokeWidth={2} />
+                    {item.label}
+                  </NavLink>
+                ))}
+
+                <div className="my-3 border-t border-base-border" />
+
+                {MOBILE_MENU_ITEMS.filter((item) => !NAV_ITEMS.some((nav) => nav.to === item.to)).map((item) => (
+                  <NavLink
+                    key={item.to}
+                    to={item.to}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={({ isActive }) =>
+                      `flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium transition-colors ${
+                        isActive
+                          ? "bg-accent/10 text-accent"
+                          : "text-ink-muted hover:text-ink hover:bg-base-raised"
+                      }`
+                    }
+                  >
+                    <item.icon size={19} strokeWidth={2} />
+                    {item.label}
+                  </NavLink>
+                ))}
+              </nav>
+
+              <div className="p-3 border-t border-base-border shrink-0">
+                <button
+                  onClick={handleMobileLogout}
+                  className="w-full flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium text-ink-muted hover:text-bad hover:bg-bad/10 transition-colors"
+                >
+                  <LogOut size={19} />
+                  Log out
+                </button>
+              </div>
+            </aside>
+          </div>
+        )}
       </div>
     </div>
   );
