@@ -7,7 +7,7 @@ import { users } from "../db/schema.js";
 import { signToken } from "../utils/jwt.js";
 import { asyncHandler, ApiError } from "../utils/asyncHandler.js";
 import { requireAuth } from "../middleware/auth.js";
-
+import { sendPasswordResetEmail } from "../utils/email.js";
 const router = Router();
 
 const signupSchema = z.object({
@@ -98,10 +98,17 @@ router.post(
     const [user] = await db.select().from(users).where(eq(users.email, email)).limit(1);
     // Always respond success to avoid leaking which emails are registered.
     if (user) {
-      const code = Math.floor(100000 + Math.random() * 900000).toString();
-      resetCodes.set(email, { code, expires: Date.now() + 15 * 60 * 1000 });
-      console.log(`[password reset] code for ${email}: ${code} (would be emailed in production)`);
-    }
+  const code = Math.floor(100000 + Math.random() * 900000).toString();
+
+  resetCodes.set(email, {
+    code,
+    expires: Date.now() + 15 * 60 * 1000,
+  });
+
+  await sendPasswordResetEmail(email, code);
+
+  console.log(`[password reset] Email sent to ${email}`);
+}
     res.json({ message: "If that email exists, a reset code has been sent." });
   })
 );
