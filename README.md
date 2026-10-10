@@ -1,157 +1,169 @@
+<div align="center">
+
 # ClassMate
 
-**Everything your class needs, in one place.**
+### Everything your class needs, in one place.
 
-ClassMate is a full-stack workspace for college students and class representatives to manage timetables, subjects, homework, announcements, and classmates in one shared, always-up-to-date place.
+A shared workspace for students to organize classes, timetables, homework, subjects, and announcements.
 
----
+[**Live Demo**](https://classmate-7181.onrender.com/) · [**Source Code**](https://github.com/kathir165/Classmate)
 
-## Stack
-
-| Layer     | Technology                                  |
-|-----------|----------------------------------------------|
-| Frontend  | React + TypeScript + Vite + Tailwind CSS      |
-| Backend   | Node.js + Express + TypeScript                |
-| Database  | PostgreSQL                                    |
-| ORM       | Drizzle ORM                                   |
-| Auth      | Self-hosted JWT + bcrypt (see note below)     |
-
-> **A note on authentication:** the brief asked for Clerk or an equivalent secure, production-ready provider. This project ships with a self-hosted equivalent — bcrypt password hashing (cost factor 12) and signed JWTs — because it can be fully implemented and reviewed without a live third-party API key. It's a legitimate production pattern, not a stub: no plaintext passwords, no hardcoded users, sessions are verified server-side on every request, and role checks happen in middleware, not in the UI. If you'd rather use Clerk, swap `backend/src/middleware/auth.ts` and `backend/src/routes/auth.ts` for Clerk's Node SDK and their frontend hooks — the rest of the app (routes, permission checks, schema) doesn't need to change.
+</div>
 
 ---
+
+## About
+
+**ClassMate** is a full-stack class-management web app designed to help students and class representatives keep everyday academic information organized in one place. Create a class, invite classmates with a class code, and coordinate schedules and updates together.
+
+## Screenshots
+
+> Screenshots from the deployed app will be added to `docs/screenshots/`. The gallery below lists the main screens captured for this project.
+
+| Login | Dashboard |
+|---|---|
+| Account login, password recovery, and sign-up entry point. | At-a-glance summary of classes, homework, classmates, timetable, and announcements. |
+
+| Timetable | Homework |
+|---|---|
+| Weekly schedule with an option to add classes. | Assignment search and filters for all, upcoming, overdue, and completed work. |
+
+| Announcements | Class onboarding |
+|---|---|
+| A central place to post class updates. | Create a new class or join one using a shared class code. |
+
+## Features
+
+- **Authentication** — sign up, log in, and recover account access.
+- **Class spaces** — create a class or join with a class code.
+- **Dashboard** — view a quick summary of class activity.
+- **Timetable** — organize classes by day and time.
+- **Homework tracking** — search assignments and filter by status.
+- **Subjects** — keep class subjects organized.
+- **Announcements** — share updates with class members.
+- **Member management** — view classmates and class membership.
+- **Settings and profile** — manage account preferences.
+- **Responsive dark UI** — dark surfaces with blue accents.
+
+## Tech stack
+
+| Layer | Technology |
+|---|---|
+| Frontend | React, TypeScript, Vite, Tailwind CSS |
+| Backend | Node.js, Express, TypeScript |
+| Database | PostgreSQL |
+| ORM | Drizzle ORM |
+| Authentication | JWT and bcrypt |
+| Validation | Zod |
 
 ## Project structure
 
-```
+```text
 classmate/
 ├── backend/
 │   ├── src/
-│   │   ├── db/            # Drizzle schema, connection, migrations runner
-│   │   ├── middleware/     # auth, class-membership/role checks, error handler
-│   │   ├── routes/         # auth, users, classes, members, subjects, timetable, homework, announcements
-│   │   └── index.ts        # Express app entry point
+│   │   ├── db/             # Database schema and connection
+│   │   ├── middleware/     # Authentication and authorization
+│   │   ├── routes/         # API routes
+│   │   └── index.ts        # Express entry point
 │   ├── drizzle.config.ts
 │   └── .env.example
 └── frontend/
     ├── src/
-    │   ├── components/     # AppShell, Avatar, badges, empty/loading states, modals
-    │   ├── context/         # Auth, Class, Toast providers
-    │   ├── lib/              # API client, shared types
-    │   └── pages/            # Landing, auth, onboarding, dashboard, timetable, subjects, homework, announcements, members, profile, settings
+    │   ├── components/     # Shared UI components
+    │   ├── context/        # App state providers
+    │   ├── lib/            # API client and shared types
+    │   └── pages/          # App pages
     └── .env.example
 ```
 
----
-
-## Database schema
-
-Normalized PostgreSQL schema (see `backend/src/db/schema.ts` for the full definition):
-
-- **users** — account info, hashed password, avatar color
-- **classes** — name, description, unique join `code`, creator
-- **class_members** — join table (userId, classId, role), unique constraint prevents duplicate membership
-- **subjects** — belongs to a class
-- **timetable_entries** — belongs to a class + subject, day of week, start/end time, room
-- **homework** — belongs to a class, optional subject, due date, status
-- **announcements** — belongs to a class, priority, message
-
-All foreign keys cascade appropriately, all lookup columns are indexed, and `class_members` has a unique index on `(classId, userId)` to prevent duplicate joins.
-
----
-
-## Local setup
+## Getting started
 
 ### Prerequisites
-- Node.js 20+
-- A PostgreSQL database (local install, Docker, or a hosted service like Neon, Supabase, or Railway)
 
-### 1. Clone and install
+- Node.js 20 or later
+- A PostgreSQL database
+- npm
+
+### 1. Clone the repository
 
 ```bash
-git clone <your-repo-url> classmate
-cd classmate/backend && npm install
-cd ../frontend && npm install
+git clone https://github.com/kathir165/Classmate.git
+cd Classmate
 ```
 
-### 2. Configure environment variables
+### 2. Install dependencies
 
 ```bash
 cd backend
-cp .env.example .env
-# Fill in DATABASE_URL and JWT_SECRET
+npm install
 
 cd ../frontend
-cp .env.example .env
-# Defaults to http://localhost:4000/api, adjust if needed
+npm install
 ```
 
-Generate a strong `JWT_SECRET`:
+### 3. Configure environment variables
+
+Copy each `.env.example` file to `.env` in its respective folder.
+
+In `backend/.env`, configure the database connection and a strong JWT secret. In `frontend/.env`, configure the API URL if your backend is not running at the default address. Never commit real secrets.
+
+### 4. Set up the database
+
+From the `backend` directory, generate and apply migrations:
+
 ```bash
-node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
+npm run db:generate
+npm run db:migrate
 ```
 
-### 3. Run database migrations
+### 5. Run the app locally
 
+Run each command in a separate terminal:
+
+**Terminal 1 — backend**
 ```bash
 cd backend
-npm run db:generate   # generates SQL migration files from the schema
-npm run db:migrate    # applies them to your database
+npm run dev
 ```
 
-### 4. Start development servers
-
-In two terminals:
-
+**Terminal 2 — frontend**
 ```bash
-# Terminal 1
-cd backend && npm run dev     # http://localhost:4000
-
-# Terminal 2
-cd frontend && npm run dev    # http://localhost:5173
+cd frontend
+npm run dev
 ```
 
-Visit `http://localhost:5173`. Create an account, create or join a class, and you're in.
-
-### Verifying multi-user behavior locally
-
-Open two browser sessions (e.g. one normal, one incognito), sign up as two different users, have the first create a class and share the generated code, and have the second join with that code. Announcements, homework, and timetable changes made by either user should appear for the other after a refresh — all data lives in Postgres, not in browser storage.
-
----
+Open the local URL printed by Vite in your terminal.
 
 ## Production build
 
-```bash
-# Backend
-cd backend
-npm run build      # compiles TypeScript to dist/
-npm start           # runs dist/index.js
+Build the backend and frontend from their respective directories:
 
-# Frontend
-cd frontend
-npm run build       # outputs static assets to dist/
-npm run preview     # locally preview the production build
+```bash
+npm run build
 ```
 
----
+For deployment, configure the production environment variables on your hosting provider and run database migrations against the production database before starting the backend.
 
 ## Deployment
 
-- **Frontend** — deploy the `frontend/dist` output to any static host (Vercel, Netlify, Cloudflare Pages). Set `VITE_API_URL` to your deployed backend's URL at build time.
-- **Backend** — deploy `backend/` to any Node host (Render, Railway, Fly.io, a VPS). Set `DATABASE_URL`, `JWT_SECRET`, `CORS_ORIGIN` (pointing at your frontend's deployed URL), and `PORT` as environment variables in the host's dashboard — never commit them.
-- **Database** — use a managed PostgreSQL instance (Neon, Supabase, Railway, RDS). Run `npm run db:migrate` against the production `DATABASE_URL` once before first boot.
+The live demo is hosted at [classmate-7181.onrender.com](https://classmate-7181.onrender.com/). Deployment configuration depends on the frontend/backend hosting arrangement and environment variables used by the running service.
 
----
+## Security
 
-## Security notes
-
-- Passwords are hashed with bcrypt (cost factor 12) — never stored or logged in plaintext.
-- Every class-scoped API route verifies the requester is a member of that class server-side (`requireClassMembership`), and admin-only actions verify the `admin` role server-side (`requireClassAdmin`) — the frontend hiding a button is never the only protection.
-- All inputs are validated with Zod before touching the database.
-- `.env` files are gitignored; only `.env.example` files (with no real secrets) are committed.
-- CORS is restricted to the configured frontend origin.
-
----
+- Passwords are hashed with bcrypt.
+- Protected API routes perform server-side authentication and authorization.
+- Request data is validated before database operations.
+- Secrets belong in environment variables, not source control.
 
 ## License
 
-Built as a portfolio/demo project. Use and modify freely.
+Built as a portfolio/demo project. See the repository for the current license and usage details.
+
+---
+
+<div align="center">
+
+**ClassMate** — helping classmates stay organized, together.
+
+</div>
