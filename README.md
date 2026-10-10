@@ -1,12 +1,12 @@
-<div align="center">
-
 # ClassMate
+
+<div align="center">
 
 ### Everything your class needs, in one place.
 
-A shared workspace for students to organize classes, timetables, homework, subjects, and announcements.
+A shared workspace for students and class representatives to manage classes, timetables, homework, subjects, and announcements.
 
-[**Live Demo**](https://classmate-7181.onrender.com/) · [**Source Code**](https://github.com/kathir165/Classmate)
+[**Live Demo**](https://classmate-7181.onrender.com/) · [**GitHub Repository**](https://github.com/kathir165/Classmate)
 
 </div>
 
@@ -14,38 +14,40 @@ A shared workspace for students to organize classes, timetables, homework, subje
 
 ## About
 
-**ClassMate** is a full-stack class-management web app designed to help students and class representatives keep everyday academic information organized in one place. Create a class, invite classmates with a class code, and coordinate schedules and updates together.
+**ClassMate** is a full-stack class-management web app built to keep everyday academic information organized in one place. Students can create a class, invite classmates using a class code, and coordinate schedules and updates together.
 
 ## Screenshots
 
-> Screenshots from the deployed app will be added to `docs/screenshots/`. The gallery below lists the main screens captured for this project.
+The deployed app uses a dark interface with blue highlights. The screenshots supplied for this refresh cover the following screens:
 
-| Login | Dashboard |
+| Login | Onboarding |
 |---|---|
-| Account login, password recovery, and sign-up entry point. | At-a-glance summary of classes, homework, classmates, timetable, and announcements. |
+| Account login and sign-up entry point. | Create a class or join one using a shared class code. |
 
-| Timetable | Homework |
+| Dashboard | Timetable |
 |---|---|
-| Weekly schedule with an option to add classes. | Assignment search and filters for all, upcoming, overdue, and completed work. |
+| Overview of classes today, pending homework, announcements, and classmates. | Weekly schedule with an option to add classes. |
 
-| Announcements | Class onboarding |
+| Homework | Announcements |
 |---|---|
-| A central place to post class updates. | Create a new class or join one using a shared class code. |
+| Search assignments and filter by all, upcoming, overdue, or completed. | A central place to post updates for class members. |
+
+> **To render the screenshots in this gallery:** add the provided image files to `docs/screenshots/` in the repository, then replace each description above with a Markdown image link such as `![Dashboard](docs/screenshots/dashboard.png)`. The screenshot files themselves are not yet committed to the repository.
 
 ## Features
 
-- **Authentication** — sign up, log in, and recover account access.
+- **Authentication** — sign-up, login, and password recovery entry point.
 - **Class spaces** — create a class or join with a class code.
-- **Dashboard** — view a quick summary of class activity.
+- **Dashboard** — see a summary of class activity.
 - **Timetable** — organize classes by day and time.
 - **Homework tracking** — search assignments and filter by status.
 - **Subjects** — keep class subjects organized.
-- **Announcements** — share updates with class members.
-- **Member management** — view classmates and class membership.
-- **Settings and profile** — manage account preferences.
-- **Responsive dark UI** — dark surfaces with blue accents.
+- **Announcements** — share updates with classmates.
+- **Member management** — view class members.
+- **Profile and settings** — access account settings.
+- **Dark UI** — dark surfaces, clear navigation, and blue accents.
 
-## Tech stack
+## Tech Stack
 
 | Layer | Technology |
 |---|---|
@@ -56,7 +58,7 @@ A shared workspace for students to organize classes, timetables, homework, subje
 | Authentication | JWT and bcrypt |
 | Validation | Zod |
 
-## Project structure
+## Project Structure
 
 ```text
 classmate/
@@ -73,17 +75,17 @@ classmate/
     │   ├── components/     # Shared UI components
     │   ├── context/        # App state providers
     │   ├── lib/            # API client and shared types
-    │   └── pages/          # App pages
+    │   └── pages/          # Application pages
     └── .env.example
 ```
 
-## Getting started
+## Getting Started
 
 ### Prerequisites
 
-- Node.js 20 or later
-- A PostgreSQL database
+- Node.js 20+
 - npm
+- A PostgreSQL database
 
 ### 1. Clone the repository
 
@@ -106,55 +108,56 @@ npm install
 
 Copy each `.env.example` file to `.env` in its respective folder.
 
-In `backend/.env`, configure the database connection and a strong JWT secret. In `frontend/.env`, configure the API URL if your backend is not running at the default address. Never commit real secrets.
+- In `backend/.env`, configure `DATABASE_URL` and a strong `JWT_SECRET`.
+- In `frontend/.env`, configure the API URL if the backend is not running at its default address.
 
-### 4. Set up the database
+Never commit real credentials or secrets. Generate a strong JWT secret with:
 
-From the `backend` directory, generate and apply migrations:
+```bash
+node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
+```
+
+### 4. Run database migrations
+
+From the `backend` directory:
 
 ```bash
 npm run db:generate
 npm run db:migrate
 ```
 
-### 5. Run the app locally
+### 5. Start the development servers
 
-Run each command in a separate terminal:
+Run these in separate terminals.
 
-**Terminal 1 — backend**
+**Backend**
 ```bash
 cd backend
 npm run dev
 ```
 
-**Terminal 2 — frontend**
+**Frontend**
 ```bash
 cd frontend
 npm run dev
 ```
 
-Open the local URL printed by Vite in your terminal.
+Open the local URL printed by Vite.
 
-## Production build
+## Production Build
 
-Build the backend and frontend from their respective directories:
+Run `npm run build` from each project directory. Configure production environment variables with your hosting provider and apply database migrations before starting the backend.
 
-```bash
-npm run build
-```
+## Live Demo
 
-For deployment, configure the production environment variables on your hosting provider and run database migrations against the production database before starting the backend.
+Try ClassMate: **[https://classmate-7181.onrender.com/](https://classmate-7181.onrender.com/)**
 
-## Deployment
+## Security Notes
 
-The live demo is hosted at [classmate-7181.onrender.com](https://classmate-7181.onrender.com/). Deployment configuration depends on the frontend/backend hosting arrangement and environment variables used by the running service.
-
-## Security
-
-- Passwords are hashed with bcrypt.
-- Protected API routes perform server-side authentication and authorization.
-- Request data is validated before database operations.
-- Secrets belong in environment variables, not source control.
+- Passwords are hashed with bcrypt rather than stored as plaintext.
+- Protected API routes should enforce authentication and authorization on the server.
+- Validate incoming data before database operations.
+- Keep secrets in environment variables and out of source control.
 
 ## License
 
