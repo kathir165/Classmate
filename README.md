@@ -189,7 +189,7 @@ The current live demo is hosted at [Render](https://classmate-7181.onrender.com/
 
 ## License
 
-ClassMate is licensed under the [MIT License](LICENSE). You may use, copy, modify, distribute, and sublicense the project, subject to the license's conditions.
+Released under the [MIT License](LICENSE).
 
 ---
 
@@ -197,6 +197,5 @@ ClassMate is licensed under the [MIT License](LICENSE). You may use, copy, modif
 
 **ClassMate** — helping classmates stay organized, together.
 
-Made with ❤️ for students.
 
 </div>
