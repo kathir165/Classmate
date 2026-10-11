@@ -2,8 +2,6 @@
 
 <div align="center">
 
-# ClassMate
-
 ### Everything your class needs, in one place.
 
 A student-focused class management platform to bring timetables, homework, subjects, and class announcements together in one workspace.
@@ -33,21 +31,7 @@ A student-focused class management platform to bring timetables, homework, subje
   </a>
 </p>
 
-> For the full gallery of individual screens, add the original screenshots to `docs/screenshots/` using the filenames listed below. Those individual image files are not currently present in the repository, so they cannot be embedded reliably yet.
-
-## Screenshots
-
-| Login and sign-up | Onboarding |
-|---|---|
-| ![Login screenshot](docs/screenshots/login.png) | ![Onboarding screenshot](docs/screenshots/onboarding.png) |
-
-| Dashboard | Timetable |
-|---|---|
-| ![Dashboard screenshot](docs/screenshots/dashboard.png) | ![Timetable screenshot](docs/screenshots/timetable.png) |
-
-| Homework | Announcements |
-|---|---|
-| ![Homework screenshot](docs/screenshots/homework.png) | ![Announcements screenshot](docs/screenshots/announcements.png) |
+> Individual screenshots are the final remaining README asset. The original six screenshots were shared in chat, but the image files still need to be added to this repository before GitHub can display them as a gallery. Use these filenames under `docs/screenshots/`: `login.png`, `onboarding.png`, `dashboard.png`, `timetable.png`, `homework.png`, and `announcements.png`.
 
 ## About
 
