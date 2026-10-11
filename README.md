@@ -31,7 +31,29 @@ A student-focused class management platform to bring timetables, homework, subje
   </a>
 </p>
 
-> Individual screenshots are the final remaining README asset. The original six screenshots were shared in chat, but the image files still need to be added to this repository before GitHub can display them as a gallery. Use these filenames under `docs/screenshots/`: `login.png`, `onboarding.png`, `dashboard.png`, `timetable.png`, `homework.png`, and `announcements.png`.
+### Application Screenshots
+
+<p align="center">
+  <img src="docs/screenshots/login.png" alt="ClassMate login screen" width="48%">
+  <img src="docs/screenshots/onboarding.png" alt="ClassMate onboarding screen" width="48%">
+</p>
+<p align="center"><em>Login and onboarding</em></p>
+
+<p align="center">
+  <img src="docs/screenshots/dashboard.png" alt="ClassMate dashboard" width="90%">
+</p>
+<p align="center"><em>Dashboard</em></p>
+
+<p align="center">
+  <img src="docs/screenshots/timetable.png" alt="ClassMate timetable" width="48%">
+  <img src="docs/screenshots/homework.png" alt="ClassMate homework tracker" width="48%">
+</p>
+<p align="center"><em>Timetable and homework</em></p>
+
+<p align="center">
+  <img src="docs/screenshots/announcements.png" alt="ClassMate announcements" width="90%">
+</p>
+<p align="center"><em>Class announcements</em></p>
 
 ## About
 
